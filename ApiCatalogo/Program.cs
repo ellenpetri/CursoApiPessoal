@@ -1,4 +1,7 @@
 using ApiCatalogo.Context;
+using ApiCatalogo.Extensions;
+using ApiCatalogo.Filters;
+using ApiCatalogo.Logging;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -12,6 +15,10 @@ builder.Services.AddSwaggerGen();
 string mySqlConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(mySqlConnection, ServerVersion.AutoDetect(mySqlConnection)));
+builder.Services.AddScoped<ApiLoggingFilter>();
+
+//Adicionar provedor do log customizado
+builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration { LogLevel = LogLevel.Information }));
 
 var app = builder.Build();
 
@@ -20,6 +27,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.ConfigureExceptionHandler();
 }
 
 app.UseHttpsRedirection();

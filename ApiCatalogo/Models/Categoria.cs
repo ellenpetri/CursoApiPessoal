@@ -11,11 +11,11 @@ public class Categoria
     [Key]
     public int CategoriaId { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "O nome da categoria não foi informado.")]
     [StringLength(80)]
     public string? Nome { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "A URL da imagem da categoria não foi informado.")]
     [StringLength(300)]
     public string? ImagemUrl { get; set; }
 
