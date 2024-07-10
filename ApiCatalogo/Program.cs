@@ -20,6 +20,9 @@ builder.Services.AddScoped<ApiLoggingFilter>();
 //Adicionar provedor do log customizado
 builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration { LogLevel = LogLevel.Information }));
 
+builder.Services.AddControllers(options => { options.Filters.Add(typeof(ApiExceptionFilter)); })
+    .AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
