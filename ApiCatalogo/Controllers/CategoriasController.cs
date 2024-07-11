@@ -1,8 +1,7 @@
-﻿using ApiCatalogo.Context;
-using ApiCatalogo.Filters;
+﻿using ApiCatalogo.Filters;
+using ApiCatalogo.Interface;
 using ApiCatalogo.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace ApiCatalogo.Controllers;
 
@@ -10,15 +9,13 @@ namespace ApiCatalogo.Controllers;
 [ApiController]
 public class CategoriasController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly ICategoriaRepository _repository;
     private readonly IConfiguration _configuration;
-    public readonly ILogger _logger;
 
-    public CategoriasController(AppDbContext context, IConfiguration configuration, ILogger<CategoriasController> logger)
+    public CategoriasController(ICategoriaRepository repository, IConfiguration configuration)
     {
-        _context = context;
+        _repository = repository;
         _configuration = configuration;
-        _logger = logger;
     }
 
     [HttpGet("LerArquivoConfiguracao")]
@@ -32,49 +29,48 @@ public class CategoriasController : ControllerBase
     }
 
     [HttpGet("produtos")]
-    public async Task<ActionResult<IEnumerable<Categoria>>> GetCategoriasProdutos()
+    public ActionResult<IEnumerable<Categoria>> GetCategoriasProdutos()
     {
-        _logger.LogInformation("--------------------------GetCategoriasProdutos----------------------------------");
-        var categoriaProduto = await _context.Categorias.AsNoTracking().Include(P => P.Produtos).Where(c => c.CategoriaId <= 5).ToListAsync();
+        var categoriaProduto = _repository.GetCategorias();
 
         if (categoriaProduto is null)
             return NotFound("Categorias e produtos não encontrados.");
 
-        return categoriaProduto;
+        return Ok(categoriaProduto);
     }
 
     [HttpGet("primeiro")]
-    public async Task<ActionResult<Categoria>> GetPrimeiro()
+    public ActionResult<Categoria> GetPrimeiro()
     {
-        var categoria = await _context.Categorias.AsNoTracking().FirstOrDefaultAsync();
+        var categoria = _repository.GetCategorias().FirstOrDefault();
 
         if (categoria is null)
             return NotFound("Categoria não encontrada.");
 
-        return categoria;
+        return Ok(categoria);
     }
 
     [HttpGet]
     [ServiceFilter(typeof(ApiLoggingFilter))]
-    public async Task<ActionResult<IEnumerable<Categoria>>> Get()
+    public ActionResult<IEnumerable<Categoria>> Get()
     {
-        var categoria = await _context.Categorias.AsNoTracking().Take(5).ToListAsync();
+        var categoria = _repository.GetCategorias().Take(5);
 
         if (categoria is null)
             return NotFound("Categorias não encontradas.");
 
-        return categoria;
+        return Ok(categoria);
     }
 
     [HttpGet("{id:int}", Name = "ObterCategoria")]
-    public async Task<ActionResult<Categoria>> Get(int id)
+    public ActionResult<Categoria> Get(int id)
     {
-        var categoria = await _context.Categorias.AsNoTracking().FirstOrDefaultAsync(x => x.CategoriaId == id);
+        var categoria = _repository.GetCategoria(id);
 
         if (categoria is null)
             return NotFound($"Categoria com o id {id} não encontrado.");
 
-        return categoria;
+        return Ok(categoria);
     }
 
     [HttpPost]
@@ -83,9 +79,7 @@ public class CategoriasController : ControllerBase
         if (categoria is null)
             return BadRequest("Categoria não foi informado.");
 
-        _context.Categorias.Add(categoria);
-
-        _context.SaveChanges();
+        _repository.Create(categoria);
 
         return new CreatedAtRouteResult("ObterCategoria", new { id = categoria.CategoriaId }, categoria);
     }
@@ -96,9 +90,7 @@ public class CategoriasController : ControllerBase
         if (id != categoria.CategoriaId)
             return BadRequest("Id informado na URL não é igual ao informado no body.");
 
-        _context.Entry(categoria).State = EntityState.Modified;
-
-        _context.SaveChanges();
+        _repository.Update(categoria);
 
         return Ok(categoria);
     }
@@ -106,14 +98,11 @@ public class CategoriasController : ControllerBase
     [HttpDelete("{id:int:min(1)}")]
     public ActionResult Delete(int id)
     {
-        var categoria = _context.Categorias.FirstOrDefault(p => p.CategoriaId == id);
+        var categoria = _repository.GetCategoria(id);
 
         if (categoria is null)
             return NotFound($"Não foi encontrado no banco de dados um categoria com o id {id}");
 
-        _context.Categorias.Remove(categoria);
-        _context.SaveChanges();
-
-        return Ok(categoria);
+        return Ok(_repository.Delete(id));
     }
 }
