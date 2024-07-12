@@ -7,16 +7,10 @@ namespace ApiCatalogo.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class CategoriasController : ControllerBase
+public class CategoriasController(IRepository<Categoria> repository, IConfiguration configuration) : ControllerBase
 {
-    private readonly ICategoriaRepository _repository;
-    private readonly IConfiguration _configuration;
-
-    public CategoriasController(ICategoriaRepository repository, IConfiguration configuration)
-    {
-        _repository = repository;
-        _configuration = configuration;
-    }
+    private readonly IRepository<Categoria> _repository = repository;
+    private readonly IConfiguration _configuration = configuration;
 
     [HttpGet("LerArquivoConfiguracao")]
     public string GetValores()
@@ -31,7 +25,7 @@ public class CategoriasController : ControllerBase
     [HttpGet("produtos")]
     public ActionResult<IEnumerable<Categoria>> GetCategoriasProdutos()
     {
-        var categoriaProduto = _repository.GetCategorias();
+        var categoriaProduto = _repository.GetAll();
 
         if (categoriaProduto is null)
             return NotFound("Categorias e produtos não encontrados.");
@@ -42,7 +36,7 @@ public class CategoriasController : ControllerBase
     [HttpGet("primeiro")]
     public ActionResult<Categoria> GetPrimeiro()
     {
-        var categoria = _repository.GetCategorias().FirstOrDefault();
+        var categoria = _repository.GetAll().FirstOrDefault();
 
         if (categoria is null)
             return NotFound("Categoria não encontrada.");
@@ -54,7 +48,7 @@ public class CategoriasController : ControllerBase
     [ServiceFilter(typeof(ApiLoggingFilter))]
     public ActionResult<IEnumerable<Categoria>> Get()
     {
-        var categoria = _repository.GetCategorias().Take(5);
+        var categoria = _repository.GetAll().Take(5);
 
         if (categoria is null)
             return NotFound("Categorias não encontradas.");
@@ -65,7 +59,7 @@ public class CategoriasController : ControllerBase
     [HttpGet("{id:int}", Name = "ObterCategoria")]
     public ActionResult<Categoria> Get(int id)
     {
-        var categoria = _repository.GetCategoria(id);
+        var categoria = _repository.Get(c => c.CategoriaId == id);
 
         if (categoria is null)
             return NotFound($"Categoria com o id {id} não encontrado.");
@@ -98,11 +92,11 @@ public class CategoriasController : ControllerBase
     [HttpDelete("{id:int:min(1)}")]
     public ActionResult Delete(int id)
     {
-        var categoria = _repository.GetCategoria(id);
+        var categoria = _repository.Get(c => c.CategoriaId == id);
 
         if (categoria is null)
             return NotFound($"Não foi encontrado no banco de dados um categoria com o id {id}");
 
-        return Ok(_repository.Delete(id));
+        return Ok(_repository.Delete(categoria));
     }
 }
