@@ -2,7 +2,7 @@
 
 namespace ApiCatalogo.Interface;
 
-public interface IProdutoRepository :IRepository<Produto>
+public interface IProdutoRepository : IRepository<Produto>
 {
     IEnumerable<Produto> GetProdutoByCategoria(int id);
 }

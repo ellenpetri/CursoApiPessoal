@@ -7,9 +7,9 @@ namespace ApiCatalogo.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class CategoriasController(IRepository<Categoria> repository, IConfiguration configuration) : ControllerBase
+public class CategoriasController(ICategoriaRepository repository, IConfiguration configuration) : ControllerBase
 {
-    private readonly IRepository<Categoria> _repository = repository;
+    private readonly ICategoriaRepository _repository = repository;
     private readonly IConfiguration _configuration = configuration;
 
     [HttpGet("LerArquivoConfiguracao")]
