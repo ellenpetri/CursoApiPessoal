@@ -1,86 +1,104 @@
-﻿using ApiCatalogo.Interface;
+﻿using ApiCatalogo.DTOs;
+using ApiCatalogo.Interface;
 using ApiCatalogo.Models;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiCatalogo.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class ProdutosController(IUnitOfWork unitOfWork) : ControllerBase
+public class ProdutosController(IUnitOfWork unitOfWork, IMapper mapper) : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly IMapper _mapper = mapper;
 
     [HttpGet("ProdutosCategoria/{id}")]
-    public ActionResult<IEnumerable<Produto>> GetProdutosCategoria(int id)
+    public ActionResult<IEnumerable<ProdutoDTO>> GetProdutosCategoria(int id)
     {
         var produtos = _unitOfWork.ProdutoRepository.GetProdutoByCategoria(id);
 
-        if (produtos.Count() == 0)
+        if (produtos is null || !produtos.Any())
             return NotFound("Produtos não encontrados.");
 
-        return Ok(produtos);
+        var produtosDto = _mapper.Map<IEnumerable<ProdutoDTO>>(produtos);
+
+        return Ok(produtosDto);
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Produto>> Get()
+    public ActionResult<IEnumerable<ProdutoDTO>> Get()
     {
         var produto = _unitOfWork.ProdutoRepository.GetAll().Take(5).ToList();
 
         if (produto is null)
             return NotFound("Produtos não encontrados.");
 
-        return Ok(produto);
+        var produtosDto = _mapper.Map<IEnumerable<ProdutoDTO>>(produto);
+
+        return Ok(produtosDto);
     }
 
     [HttpGet("First")]
-    public ActionResult<Produto> GetPrimeiro()
+    public ActionResult<ProdutoDTO> GetPrimeiro()
     {
-
         var produto = _unitOfWork.ProdutoRepository.GetAll().FirstOrDefault();
 
         if (produto is null)
             return NotFound("Produto não encontrado.");
 
-        return Ok(produto);
+        var produtoDto = _mapper.Map<ProdutoDTO>(produto);
+
+        return Ok(produtoDto);
     }
 
     [HttpGet("ById/{id:int:min(1)}", Name = "ObterProduto")]
-    public ActionResult<Produto> Get(int id)
+    public ActionResult<ProdutoDTO> Get(int id)
     {
         var produto = _unitOfWork.ProdutoRepository.Get(c => c.ProdutoId == id);
 
         if (produto is null)
             return NotFound($"Produto com o id {id} não encontrado.");
 
-        return Ok(produto);
+        var produtosDto = _mapper.Map<IEnumerable<ProdutoDTO>>(produto);
+
+        return Ok(produtosDto);
     }
 
     [HttpPost]
-    public ActionResult Post(Produto produto)
+    public ActionResult<ProdutoDTO> Post(ProdutoDTO produtoDto)
     {
-        if (produto is null)
+        if (produtoDto is null)
             return BadRequest("Produto não foi informado.");
 
-        _unitOfWork.ProdutoRepository.Create(produto);
+        var produto = _mapper.Map<Produto>(produtoDto);
+
+        var novoProduto = _unitOfWork.ProdutoRepository.Create(produto);
         _unitOfWork.Commit();
 
-        return new CreatedAtRouteResult("ObterProduto", new { id = produto.ProdutoId }, produto);
+        produtoDto = _mapper.Map<ProdutoDTO>(novoProduto);
+
+        return new CreatedAtRouteResult("ObterProduto", new { id = produtoDto.ProdutoId }, produtoDto);
     }
 
     [HttpPut("{id:int:min(1)}")]
-    public ActionResult Put(int id, Produto produto)
+    public ActionResult<ProdutoDTO> Put(int id, ProdutoDTO produtoDto)
     {
-        if (id != produto.ProdutoId)
+        if (id != produtoDto.ProdutoId)
             return BadRequest("Id informado na URL não é igual ao informado no body.");
 
-        var retorno = _unitOfWork.ProdutoRepository.Update(produto);
+        var produto = _mapper.Map<Produto>(produtoDto);
+
+        var novoProduto = _unitOfWork.ProdutoRepository.Update(produto);
         _unitOfWork.Commit();
 
-        return Ok(produto);
+        produtoDto = _mapper.Map<ProdutoDTO>(novoProduto);
+
+        return Ok(produtoDto);
     }
 
     [HttpDelete("{id:int}'")]
-    public ActionResult Delete(int id)
+    public ActionResult<ProdutoDTO> Delete(int id)
     {
         Produto produto = _unitOfWork.ProdutoRepository.Get(p => p.ProdutoId == id);
 

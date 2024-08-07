@@ -1,4 +1,5 @@
 using ApiCatalogo.Context;
+using ApiCatalogo.DTOs.Mappings;
 using ApiCatalogo.Extensions;
 using ApiCatalogo.Filters;
 using ApiCatalogo.Interface;
@@ -26,6 +27,8 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 //Adicionar provedor do log customizado
 builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration { LogLevel = LogLevel.Information }));
+
+builder.Services.AddAutoMapper(typeof(ProdutoDTOMappingProfile));
 
 builder.Services.AddControllers(options => { options.Filters.Add(typeof(ApiExceptionFilter)); })
     .AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
