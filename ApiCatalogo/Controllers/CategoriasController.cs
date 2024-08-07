@@ -18,7 +18,7 @@ public class CategoriasController(IUnitOfWork unitOfWork, IMapper mapper) : Cont
     [ServiceFilter(typeof(ApiLoggingFilter))]
     public ActionResult<IEnumerable<CategoriaDTO>> Get()
     {
-        var categorias = _unitOfWork.CategoriaRepository.GetAll().Take(5);
+        var categorias = _unitOfWork.CategoriaRepository.GetAll();
 
         if (categorias == null || !categorias.Any())
             return NotFound("Categorias não encontradas.");

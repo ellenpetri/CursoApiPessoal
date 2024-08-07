@@ -1,6 +1,7 @@
 ﻿using ApiCatalogo.DTOs;
 using ApiCatalogo.Interface;
 using ApiCatalogo.Models;
+using ApiCatalogo.Pagination;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,6 +13,16 @@ public class ProdutosController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IMapper _mapper = mapper;
+
+    [HttpGet("pagination")]
+    public ActionResult<IEnumerable<ProdutoDTO>> Get([FromQuery] ProdutosParameters produtosParameters)
+    {
+        var produtos = _unitOfWork.ProdutoRepository.GetProdutos(produtosParameters);
+
+        var produtosDto = _mapper.Map<IEnumerable<ProdutoDTO>>(produtos);
+
+        return Ok(produtosDto);
+    }
 
     [HttpGet("ProdutosCategoria/{id}")]
     public ActionResult<IEnumerable<ProdutoDTO>> GetProdutosCategoria(int id)
@@ -29,7 +40,7 @@ public class ProdutosController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
     [HttpGet]
     public ActionResult<IEnumerable<ProdutoDTO>> Get()
     {
-        var produto = _unitOfWork.ProdutoRepository.GetAll().Take(5).ToList();
+        var produto = _unitOfWork.ProdutoRepository.GetAll().ToList();
 
         if (produto is null)
             return NotFound("Produtos não encontrados.");
