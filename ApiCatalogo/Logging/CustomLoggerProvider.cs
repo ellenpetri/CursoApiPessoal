@@ -10,7 +10,7 @@ public class CustomLoggerProvider : ILoggerProvider
     public CustomLoggerProvider(CustomLoggerProviderConfiguration loggerConfig)
     {
 
-       loggerConfig = loggerConfig;
+        loggerConfig = loggerConfig;
     }
 
     public ILogger CreateLogger(string categoryName)

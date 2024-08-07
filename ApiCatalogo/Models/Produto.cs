@@ -36,19 +36,19 @@ public class Produto : IValidatableObject
     [JsonIgnore]
     public Categoria? Categoria { get; set; }
 
-    public  IEnumerable<ValidationResult> Validate (ValidationContext validationContext)
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (!String.IsNullOrWhiteSpace(this.Nome))
         {
-           var primeiraLetra = this.Nome[0].ToString();
-            if(primeiraLetra != primeiraLetra.ToUpper())
+            var primeiraLetra = this.Nome[0].ToString();
+            if (primeiraLetra != primeiraLetra.ToUpper())
                 yield return new ValidationResult("A primeira letra do produto deve ser maíscula", [nameof(this.Nome)]);
         }
 
         if (this.Estoque <= 0)
-            yield return new ValidationResult("O estoque deve ser maior que zero", [nameof (this.Estoque)]);
+            yield return new ValidationResult("O estoque deve ser maior que zero", [nameof(this.Estoque)]);
 
-        
+
     }
 
 }

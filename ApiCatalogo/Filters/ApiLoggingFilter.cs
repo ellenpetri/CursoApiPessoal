@@ -28,5 +28,5 @@ public class ApiLoggingFilter : IActionFilter
         _logger.LogInformation("------------------------------------------------------------");
     }
 
-    
+
 }
