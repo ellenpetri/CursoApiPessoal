@@ -2,8 +2,10 @@
 using ApiCatalogo.Filters;
 using ApiCatalogo.Interface;
 using ApiCatalogo.Models;
+using ApiCatalogo.Pagination;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace ApiCatalogo.Controllers;
 
@@ -13,6 +15,28 @@ public class CategoriasController(IUnitOfWork unitOfWork, IMapper mapper) : Cont
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IMapper _mapper = mapper;
+
+    [HttpGet("pagination")]
+    public ActionResult<IEnumerable<CategoriaDTO>> Get([FromQuery] CategoriasParameters categoriasParameters)
+    {
+        var categoria = _unitOfWork.CategoriaRepository.GetCategorias(categoriasParameters);
+
+        var metadata = new
+        {
+            categoria.TotalCount,
+            categoria.PageSize,
+            categoria.CurrentPage,
+            categoria.TotalPages,
+            categoria.HasNext,
+            categoria.HasPrevious
+        };
+
+        Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
+
+        var categoriaDto = _mapper.Map<IEnumerable<CategoriaDTO>>(categoria);
+
+        return Ok(categoriaDto);
+    }
 
     [HttpGet]
     [ServiceFilter(typeof(ApiLoggingFilter))]
