@@ -9,10 +9,9 @@ namespace ApiCatalogo.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class CategoriasController(IUnitOfWork unitOfWork, IConfiguration configuration, IMapper mapper) : ControllerBase
+public class CategoriasController(IUnitOfWork unitOfWork, IMapper mapper) : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
-    private readonly IConfiguration _configuration = configuration;
     private readonly IMapper _mapper = mapper;
 
     [HttpGet]
