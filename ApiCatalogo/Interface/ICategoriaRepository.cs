@@ -3,7 +3,8 @@ using ApiCatalogo.Pagination;
 
 namespace ApiCatalogo.Interface;
 
-public interface ICategoriaRepository : IRepository<Categoria> 
+public interface ICategoriaRepository : IRepository<Categoria>
 {
     PagedList<Categoria> GetCategorias(CategoriasParameters categoriaParams);
+    PagedList<Categoria> GetCategoriasFiltroNome(CategoriasFiltroNome categoriasParams);
 }

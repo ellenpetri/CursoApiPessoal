@@ -21,6 +21,18 @@ public class CategoriasController(IUnitOfWork unitOfWork, IMapper mapper) : Cont
     {
         var categoria = _unitOfWork.CategoriaRepository.GetCategorias(categoriasParameters);
 
+        return ObterCategorias(categoria);
+    }
+
+    [HttpGet("filter/nome/pagination")]
+    public ActionResult<IEnumerable<CategoriaDTO>> GetCategoriasFiltradas([FromQuery] CategoriasFiltroNome categoriasFiltro)
+    {
+        var categoriasFiltradas = _unitOfWork.CategoriaRepository.GetCategoriasFiltroNome(categoriasFiltro);
+
+        return ObterCategorias(categoriasFiltradas);
+    }
+    private ActionResult<IEnumerable<CategoriaDTO>> ObterCategorias(PagedList<Categoria> categoria)
+    {
         var metadata = new
         {
             categoria.TotalCount,
